@@ -62,20 +62,20 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Handler handler = new Handler(Looper.getMainLooper());
-        handler.postDelayed(new RepeatClick(startCollect), 2000);
+//        Handler handler = new Handler(Looper.getMainLooper());
+//        handler.postDelayed(new RepeatClick(startCollect), 2000);
 
     }
 
-    static class RepeatClick implements Runnable {
-        View v;
-        public RepeatClick(Button btn) {
-            this.v = btn;
-        }
-        @Override
-        public void run() {
-            v.performClick();
-            v.postDelayed(this, 2000);
-        }
-    }
+//    static class RepeatClick implements Runnable {
+//        View v;
+//        public RepeatClick(Button btn) {
+//            this.v = btn;
+//        }
+//        @Override
+//        public void run() {
+//            v.performClick();
+//            v.postDelayed(this, 2000);
+//        }
+//    }
 }

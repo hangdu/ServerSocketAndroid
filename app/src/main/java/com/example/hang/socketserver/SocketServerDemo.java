@@ -50,24 +50,29 @@ public class SocketServerDemo extends Thread {
             os.flush();
 
             //receive
-            InputStream in = s.getInputStream();
+            InputStream in = null;
+            while (true) {
+                in = s.getInputStream();
 //            myHandler.sendEmptyMessage(1);
+                byte[] b = new byte[32];
+                int count = in.read(b);
 
-            byte[] b = new byte[32];
-            int count = in.read(b);
-            byte temp[] = new byte[count];
-            for (int i = 0; i < count; i++) {
-                temp[i] = b[i];
+                //check the value of count so that the server know whether the client close the socket or not
+                if (count <= 0) {
+                    break;
+                }
+                byte temp[] = new byte[count];
+                for (int i = 0; i < count; i++) {
+                    temp[i] = b[i];
+                }
+                String str =  new String(temp);
+                Message msg = new Message();
+                msg.what = 1;
+                msg.obj = str;
+                myHandler.sendMessage(msg);
             }
-            String str =  new String(temp);
-            Message msg = new Message();
-            msg.what = 1;
-            msg.obj = str;
-            myHandler.sendMessage(msg);
-
             os.close();
             in.close();
-
             s.close();
         } catch (IOException e1) {
             myHandler.sendEmptyMessage(2);
