@@ -22,6 +22,7 @@ public class MainActivity extends AppCompatActivity {
     Button startCollect;
     Button stopCollect;
     List<Socket> socketList = new ArrayList<Socket>();
+    SocketServerDemo socketServerDemo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +38,9 @@ public class MainActivity extends AppCompatActivity {
                     ServerSocket server = new ServerSocket(12345);
                     while(true){
                         Socket s = server.accept();
-                        socketList.add(s);
+//                        socketList.add(s);
+                        socketServerDemo = new SocketServerDemo(textView, s);
+                        new Thread(socketServerDemo).start();
                         //每当客户端连接之后启动一条ServerThread线程为该客户端服务
                     }
                 } catch (IOException e) {
@@ -51,22 +54,17 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 textView.setText("Button is clicked!");
-
-                if (socketList.size() == 0) {
-                    return;
-                }
-                new Thread(new SocketServerDemo(textView, 1, socketList.get(0))).start();
-                socketList.remove(0);
+                socketServerDemo.sendCommand(1);
             }
         });
 
 
-//        stopCollect.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                socketServerDemo.setCommand(0);
-//            }
-//        });
+        stopCollect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                socketServerDemo.sendCommand(0);
+            }
+        });
     }
 
 }
