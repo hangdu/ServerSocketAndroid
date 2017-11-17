@@ -24,6 +24,8 @@ public class SocketServerDemo extends Thread {
         this.s = s;
     }
 
+
+
     public Handler myHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -46,7 +48,7 @@ public class SocketServerDemo extends Thread {
             //command==0 means:  start to collect data
             //command==1 means:  stop to collect data
             OutputStream os = s.getOutputStream();
-            os.write(command);
+            os.write(String.valueOf(command).getBytes());
             os.flush();
 
             //receive

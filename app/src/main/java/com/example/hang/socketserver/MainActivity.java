@@ -30,7 +30,6 @@ public class MainActivity extends AppCompatActivity {
         textView = (TextView) findViewById(R.id.textview);
         startCollect = (Button) findViewById(R.id.startCollect);
         stopCollect = (Button) findViewById(R.id.stopCollect);
-
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
@@ -56,26 +55,18 @@ public class MainActivity extends AppCompatActivity {
                 if (socketList.size() == 0) {
                     return;
                 }
-                new Thread(new SocketServerDemo(textView, 0, socketList.get(0))).start();
+                new Thread(new SocketServerDemo(textView, 1, socketList.get(0))).start();
                 socketList.remove(0);
-
             }
         });
 
-//        Handler handler = new Handler(Looper.getMainLooper());
-//        handler.postDelayed(new RepeatClick(startCollect), 2000);
 
+//        stopCollect.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                socketServerDemo.setCommand(0);
+//            }
+//        });
     }
 
-//    static class RepeatClick implements Runnable {
-//        View v;
-//        public RepeatClick(Button btn) {
-//            this.v = btn;
-//        }
-//        @Override
-//        public void run() {
-//            v.performClick();
-//            v.postDelayed(this, 2000);
-//        }
-//    }
 }
