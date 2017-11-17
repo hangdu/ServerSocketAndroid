@@ -19,6 +19,7 @@ import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
     TextView textView;
+    TextView status_textview;
     Button startCollect;
     Button stopCollect;
     List<Socket> socketList = new ArrayList<Socket>();
@@ -29,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         textView = (TextView) findViewById(R.id.textview);
+        status_textview = (TextView) findViewById(R.id.status_textview);
         startCollect = (Button) findViewById(R.id.startCollect);
         stopCollect = (Button) findViewById(R.id.stopCollect);
         Runnable runnable = new Runnable() {
@@ -39,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
                     while(true){
                         Socket s = server.accept();
 //                        socketList.add(s);
-                        socketServerDemo = new SocketServerDemo(textView, s);
+                        socketServerDemo = new SocketServerDemo(textView, status_textview, s);
                         new Thread(socketServerDemo).start();
                         //每当客户端连接之后启动一条ServerThread线程为该客户端服务
                     }

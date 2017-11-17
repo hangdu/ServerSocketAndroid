@@ -19,6 +19,7 @@ import java.util.Queue;
 
 public class SocketServerDemo extends Thread {
     TextView textView;
+    TextView status_textview;
 //    int command;
     Socket s;
     InputStream in;
@@ -26,11 +27,10 @@ public class SocketServerDemo extends Thread {
 
     boolean isReceive = false;
     Queue<Integer> commandQueue = new LinkedList<>();
-    public SocketServerDemo(TextView textView, Socket s) {
+    public SocketServerDemo(TextView textView, TextView status_textview, Socket s) {
         this.textView = textView;
-//        this.command = command;
+        this.status_textview = status_textview;
         this.s = s;
-//        sendCommand(command);
     }
 
     public void sendCommand(int command) {
@@ -41,12 +41,18 @@ public class SocketServerDemo extends Thread {
         @Override
         public void handleMessage(Message msg) {
             if (msg.what == 0) {
-                textView.setText("new client joins in");
+                status_textview.setText("new client joins in");
             } else if (msg.what == 1) {
                 textView.setText("receive data from client:" + msg.obj);
             } else if (msg.what == 2) {
                 textView.setText("Stop is clicked");
-            } else {
+            } else if(msg.what == 3) {
+                textView.setText("send command 1");
+            } else if (msg.what == 4) {
+                status_textview.setText("Client is not connected.");
+            }
+
+            else {
                 textView.setText("something wrong");
             }
         }
@@ -56,6 +62,7 @@ public class SocketServerDemo extends Thread {
     public void run() {
         // TODO Auto-generated method stub
         super.run();
+        myHandler.sendEmptyMessage(0);
         while (true) {
             while (!commandQueue.isEmpty()) {
                 int curCommand = commandQueue.poll();
@@ -69,12 +76,20 @@ public class SocketServerDemo extends Thread {
 
                 if (curCommand == 1) {
                     isReceive = true;
-                    myHandler.sendEmptyMessage(0);
+                    myHandler.sendEmptyMessage(3);
                     Runnable runnable= new Runnable() {
                         @Override
                         public void run() {
                             while (isReceive) {
                                 try {
+                                    if (!s.isConnected()) {
+                                        //the socket is not conntected because the long distance between the device and server
+                                        myHandler.sendEmptyMessage(4);
+                                        os.close();
+                                        in.close();
+                                        s.close();
+                                        return;
+                                    }
                                     in = s.getInputStream();
                                     byte[] b = new byte[32];
                                     int count = in.read(b);
