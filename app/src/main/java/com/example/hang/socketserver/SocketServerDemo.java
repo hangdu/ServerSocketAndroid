@@ -82,17 +82,16 @@ public class SocketServerDemo extends Thread {
                         public void run() {
                             while (isReceive) {
                                 try {
-                                    if (!s.isConnected()) {
-                                        //the socket is not conntected because the long distance between the device and server
-                                        myHandler.sendEmptyMessage(4);
+                                    in = s.getInputStream();
+                                    byte[] b = new byte[32];
+                                    int count = in.read(b);
+                                    if (count <= 0) {
+                                        //the socket is closed from the client side.  In this case, the server need to release the resources of the socket
                                         os.close();
                                         in.close();
                                         s.close();
                                         return;
                                     }
-                                    in = s.getInputStream();
-                                    byte[] b = new byte[32];
-                                    int count = in.read(b);
                                     //check the value of count so that the server know whether the client close the socket or not
                                     byte temp[] = new byte[count];
                                     for (int i = 0; i < count; i++) {
