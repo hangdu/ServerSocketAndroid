@@ -153,17 +153,25 @@ public class SocketServerDemo extends Thread {
 
                     String resultStr = mInputStream.readUTF();
                     Logger.d(TAG, "read:" + resultStr);
-                    if (resultStr.equals("heartbeat")) {
-                        //receive heartBeat
-                        myHandler.sendEmptyMessage(5);
-                        lastReceiveHeartbeatTime = System.currentTimeMillis();
-                    } else  {
-                        //signal strength data
-                        Message msg = new Message();
-                        msg.what = 1;
-                        msg.obj = resultStr;
-                        myHandler.sendMessage(msg);
-                    }
+
+
+                    Message msg = new Message();
+                    msg.what = 1;
+                    msg.obj = resultStr;
+                    myHandler.sendMessage(msg);
+                    lastReceiveHeartbeatTime = System.currentTimeMillis();
+
+//                    if (resultStr.equals("heartbeat")) {
+//                        //receive heartBeat
+//                        myHandler.sendEmptyMessage(5);
+//                        lastReceiveHeartbeatTime = System.currentTimeMillis();
+//                    } else  {
+//                        //signal strength data
+//                        Message msg = new Message();
+//                        msg.what = 1;
+//                        msg.obj = resultStr;
+//                        myHandler.sendMessage(msg);
+//                    }
                 }
             } catch (UnknownHostException e) {
                 e.printStackTrace();
@@ -196,7 +204,7 @@ public class SocketServerDemo extends Thread {
             if (msg.what == 0) {
                 status_textview.setText("new client joins in");
             } else if (msg.what == 1) {
-                textView.setText("receive data from client:" + msg.obj);
+                status_textview.setText(msg.obj + "");
             } else if (msg.what == 2) {
                 textView.setText("Stop is clicked");
             } else if(msg.what == 3) {
