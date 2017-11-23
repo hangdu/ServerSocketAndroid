@@ -3,22 +3,20 @@ package com.example.hang.socketserver;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.SystemClock;
 import android.widget.TextView;
 
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
 import com.orhanobut.logger.Logger;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.Queue;
-
 
 /**
  * Created by hang on 11/13/17.
@@ -28,17 +26,20 @@ public class SocketServerDemo extends Thread {
     TextView textView;
     TextView status_textview;
     Socket mSocket;
-    InputStream in;
-    OutputStream os;
     long lastReceiveHeartbeatTime;
-
-    boolean isReceive = false;
+    private LineGraphSeries<DataPoint> mSeries2;
     SocketReadThread readThread;
     Queue<Integer> commandQueue = new LinkedList<>();
-    public SocketServerDemo(TextView textView, TextView status_textview, Socket s) {
+    GraphView graph2;
+    private double graph2LastXValue = 5d;
+    public SocketServerDemo(TextView textView, TextView status_textview, Socket s, GraphView graph2) {
         this.textView = textView;
         this.status_textview = status_textview;
         this.mSocket = s;
+        this.graph2 = graph2;
+        mSeries2 = new LineGraphSeries<>();
+        this.graph2.addSeries(mSeries2);
+
         lastReceiveHeartbeatTime = System.currentTimeMillis();
 
         new Thread(monitorHeartBeat).start();
@@ -85,6 +86,7 @@ public class SocketServerDemo extends Thread {
                     msg.obj = "Not receiving heartbeat on time. Closing this socket";
                     myHandler.sendMessage(msg);
                     releaseLastSocket();
+                    graph2.removeSeries(mSeries2);
 
                     return;
                 }
@@ -149,29 +151,20 @@ public class SocketServerDemo extends Thread {
                 mInputStream = new DataInputStream(mSocket.getInputStream());
                 Logger.d(TAG, "SocketThread running!");
                 while (!mStopThread) {
-
-
                     String resultStr = mInputStream.readUTF();
                     Logger.d(TAG, "read:" + resultStr);
-
 
                     Message msg = new Message();
                     msg.what = 1;
                     msg.obj = resultStr;
                     myHandler.sendMessage(msg);
-                    lastReceiveHeartbeatTime = System.currentTimeMillis();
 
-//                    if (resultStr.equals("heartbeat")) {
-//                        //receive heartBeat
-//                        myHandler.sendEmptyMessage(5);
-//                        lastReceiveHeartbeatTime = System.currentTimeMillis();
-//                    } else  {
-//                        //signal strength data
-//                        Message msg = new Message();
-//                        msg.what = 1;
-//                        msg.obj = resultStr;
-//                        myHandler.sendMessage(msg);
-//                    }
+                    graph2LastXValue += 1d;
+                    int index = resultStr.indexOf('=');
+                    double RSSI = Double.valueOf(resultStr.substring(index+1));
+
+                    mSeries2.appendData(new DataPoint(graph2LastXValue, RSSI), true, 40);
+                    lastReceiveHeartbeatTime = System.currentTimeMillis();
                 }
             } catch (UnknownHostException e) {
                 e.printStackTrace();
@@ -236,7 +229,5 @@ public class SocketServerDemo extends Thread {
 
         readThread = new SocketReadThread();
         readThread.start();
-
-
     }
 }
