@@ -28,7 +28,9 @@ public class SocketServerDemo extends Thread {
     Socket mSocket;
     long lastReceiveHeartbeatTime;
 
+
     SocketReadThread readThread;
+    SocketWriteThread writeThread;
     Queue<Integer> commandQueue = new LinkedList<>();
     public SocketServerDemo(TextView textView, TextView status_textview, Socket s) {
         this.textView = textView;
@@ -99,18 +101,22 @@ public class SocketServerDemo extends Thread {
     Runnable monitorHeartBeat = new Runnable() {
         @Override
         public void run() {
-            if (System.currentTimeMillis() - lastReceiveHeartbeatTime > 10000) {
+            if (System.currentTimeMillis() - lastReceiveHeartbeatTime > 13000) {
                 Logger.d("SocketServerDemo", "Not receiving heartbeat on time. Closing this socket");
                 Message msg = new Message();
                 msg.what = 7;
                 msg.obj = "Not receiving heartbeat on time. Closing this socket";
                 myHandler.sendMessage(msg);
+
                 releaseLastSocket();
+                writeThread.release();
+                readThread.release();
+                commandQueue.clear();
                 myHandler.removeCallbacks(monitorHeartBeat);
                 return;
             }
 
-            myHandler.postDelayed(monitorHeartBeat, 10000);
+            myHandler.postDelayed(monitorHeartBeat, 13000);
         }
     };
 
@@ -126,10 +132,10 @@ public class SocketServerDemo extends Thread {
             DataOutputStream mOutputStream = null;
             try {
                 mOutputStream = new DataOutputStream(mSocket.getOutputStream());
-                while (mStopThread) {
+                while (!mStopThread) {
                     while (!commandQueue.isEmpty()) {
                         int curCommand = commandQueue.poll();
-                        mOutputStream.writeBytes(String.valueOf(curCommand));
+                        mOutputStream.writeUTF(String.valueOf(curCommand));
                     }
                 }
             } catch (UnknownHostException e) {
@@ -166,12 +172,13 @@ public class SocketServerDemo extends Thread {
                 while (!mStopThread) {
                     String resultStr = mInputStream.readUTF();
                     Logger.d(TAG, "read:" + resultStr);
-
+                    if (resultStr.equals("heartbeat")) {
+                        lastReceiveHeartbeatTime = System.currentTimeMillis();
+                    }
                     Message msg = new Message();
                     msg.what = 1;
                     msg.obj = resultStr;
                     myHandler.sendMessage(msg);
-                    lastReceiveHeartbeatTime = System.currentTimeMillis();
                 }
             } catch (UnknownHostException e) {
                 e.printStackTrace();
@@ -207,5 +214,8 @@ public class SocketServerDemo extends Thread {
 
         readThread = new SocketReadThread();
         readThread.start();
+
+        writeThread = new SocketWriteThread();
+        writeThread.start();
     }
 }
