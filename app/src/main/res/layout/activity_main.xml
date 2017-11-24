@@ -32,14 +32,10 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-            android:id="@+id/status_textview"
+        android:id="@+id/status_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Status"/>
 
-    <com.jjoe64.graphview.GraphView
-        android:layout_width="match_parent"
-        android:layout_height="360dip"
-        android:id="@+id/graph2" />
 
 </LinearLayout>

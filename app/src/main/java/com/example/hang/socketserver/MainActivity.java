@@ -26,9 +26,7 @@ public class MainActivity extends AppCompatActivity {
     TextView status_textview;
     Button startCollect;
     Button stopCollect;
-    List<Socket> socketList = new ArrayList<Socket>();
     SocketServerDemo socketServerDemo;
-    private LineGraphSeries<DataPoint> mSeries2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,22 +37,6 @@ public class MainActivity extends AppCompatActivity {
         startCollect = (Button) findViewById(R.id.startCollect);
         stopCollect = (Button) findViewById(R.id.stopCollect);
 
-        final GraphView graph2 = (GraphView) findViewById(R.id.graph2);
-        graph2.getViewport().setXAxisBoundsManual(true);
-        graph2.getViewport().setYAxisBoundsManual(true);
-        graph2.getViewport().setMinX(0);
-        graph2.getViewport().setMaxX(40);
-        graph2.getViewport().setMaxY(0);
-        graph2.getViewport().setMinY(-100);
-
-        graph2.getViewport().setScrollable(true); // enables horizontal scrolling
-        graph2.getViewport().setScalable(true); // enables horizontal zooming and scrolling
-        graph2.getViewport().setScrollableY(true); // enables horizontal scrolling
-        graph2.getViewport().setScalableY(true); // enables horizontal zooming and scrolling
-
-        mSeries2 = new LineGraphSeries<>();
-        graph2.addSeries(mSeries2);
-
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
@@ -62,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
                     ServerSocket server = new ServerSocket(12345);
                     while(true){
                         Socket s = server.accept();
-                        socketServerDemo = new SocketServerDemo(textView, status_textview, s, mSeries2);
+                        socketServerDemo = new SocketServerDemo(textView, status_textview, s);
                         new Thread(socketServerDemo).start();
                         //每当客户端连接之后启动一条ServerThread线程为该客户端服务
                     }
