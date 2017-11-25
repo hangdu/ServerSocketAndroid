@@ -27,6 +27,7 @@ public class SocketServerDemo extends Thread {
     TextView status_textview;
     Socket mSocket;
     long lastReceiveHeartbeatTime;
+    long lastReceiveRSSITime;
 
 
     SocketReadThread readThread;
@@ -101,7 +102,7 @@ public class SocketServerDemo extends Thread {
     Runnable monitorHeartBeat = new Runnable() {
         @Override
         public void run() {
-            if (System.currentTimeMillis() - lastReceiveHeartbeatTime > 13000) {
+            if (System.currentTimeMillis() - lastReceiveHeartbeatTime > 9000 && System.currentTimeMillis() - lastReceiveRSSITime > 9000) {
                 Logger.d("SocketServerDemo", "Not receiving heartbeat on time. Closing this socket");
                 Message msg = new Message();
                 msg.what = 7;
@@ -116,7 +117,7 @@ public class SocketServerDemo extends Thread {
                 return;
             }
 
-            myHandler.postDelayed(monitorHeartBeat, 13000);
+            myHandler.postDelayed(monitorHeartBeat, 9000);
         }
     };
 
@@ -174,6 +175,8 @@ public class SocketServerDemo extends Thread {
                     Logger.d(TAG, "read:" + resultStr);
                     if (resultStr.equals("heartbeat")) {
                         lastReceiveHeartbeatTime = System.currentTimeMillis();
+                    } else {
+                        lastReceiveRSSITime = System.currentTimeMillis();
                     }
                     Message msg = new Message();
                     msg.what = 1;

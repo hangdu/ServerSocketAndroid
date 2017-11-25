@@ -1,27 +1,15 @@
 package com.example.hang.socketserver;
 
-import android.os.Handler;
-import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-
-import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.series.DataPoint;
-import com.jjoe64.graphview.series.LineGraphSeries;
-
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements LabelDialog.LabelDialogListener {
     TextView textView;
     TextView status_textview;
     Button startCollect;
@@ -58,8 +46,8 @@ public class MainActivity extends AppCompatActivity {
         startCollect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                textView.setText("Button is clicked!");
-                socketServerDemo.sendCommand(1);
+                textView.setText("StartCollect Button is clicked!");
+                openDialog();
             }
         });
 
@@ -67,8 +55,22 @@ public class MainActivity extends AppCompatActivity {
         stopCollect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                textView.setText("Stop Button is clicked!");
                 socketServerDemo.sendCommand(0);
             }
         });
+    }
+
+    public void openDialog() {
+        LabelDialog labelDialog = new LabelDialog();
+        labelDialog.show(getSupportFragmentManager(), "label dialog");
+
+    }
+
+
+    @Override
+    public void applyText(String label) {
+        textView.setText("label is " + label);
+        socketServerDemo.sendCommand(1);
     }
 }
