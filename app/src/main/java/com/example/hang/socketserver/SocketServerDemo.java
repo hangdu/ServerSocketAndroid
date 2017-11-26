@@ -13,6 +13,7 @@ import com.orhanobut.logger.Logger;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.InterfaceAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
@@ -28,7 +29,6 @@ public class SocketServerDemo extends Thread {
     Socket mSocket;
     long lastReceiveHeartbeatTime;
     long lastReceiveRSSITime;
-
 
     SocketReadThread readThread;
     SocketWriteThread writeThread;
@@ -177,6 +177,9 @@ public class SocketServerDemo extends Thread {
                         lastReceiveHeartbeatTime = System.currentTimeMillis();
                     } else {
                         lastReceiveRSSITime = System.currentTimeMillis();
+                        int index = resultStr.indexOf('=');
+                        int RSSI = Integer.valueOf(resultStr.substring(index+2));
+                        MainActivity.strengthList.add(RSSI);
                     }
                     Message msg = new Message();
                     msg.what = 1;

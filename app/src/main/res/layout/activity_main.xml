@@ -21,6 +21,12 @@
         android:layout_height="wrap_content"
         android:text="stop" />
 
+    <Button
+        android:id="@+id/track"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="track" />
+
     <TextView
         android:id="@+id/textview"
         android:layout_width="wrap_content"

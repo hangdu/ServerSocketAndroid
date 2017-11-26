@@ -8,23 +8,33 @@ import android.widget.TextView;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements LabelDialog.LabelDialogListener {
     TextView textView;
     TextView status_textview;
     Button startCollect;
     Button stopCollect;
+    Button track;
     SocketServerDemo socketServerDemo;
+    static List<Integer> strengthList;
+    Map<String, Double> map;
+    String label = null;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         textView = (TextView) findViewById(R.id.textview);
         status_textview = (TextView) findViewById(R.id.status_textview);
         startCollect = (Button) findViewById(R.id.startCollect);
         stopCollect = (Button) findViewById(R.id.stopCollect);
-
+        track = (Button) findViewById(R.id.track);
+        strengthList = new ArrayList<>();
+        map = new HashMap<>();
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
@@ -51,12 +61,47 @@ public class MainActivity extends AppCompatActivity implements LabelDialog.Label
             }
         });
 
-
         stopCollect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 textView.setText("Stop Button is clicked!");
                 socketServerDemo.sendCommand(0);
+
+                //analyze strengthList
+                //先用平均数来处理
+                StringBuilder builder = new StringBuilder();
+                double temp = 0;
+                for (int val : strengthList) {
+                    builder.append(val);
+                    builder.append(',');
+                    temp += val;
+                }
+                temp = temp / strengthList.size();
+
+                textView.setText(new String(builder) + '\n' + "averageRSSI = " + temp);
+                System.out.print(new String(builder));
+                strengthList.clear();
+                map.put(label, temp);
+            }
+        });
+
+        track.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (map.size() == 0) {
+                    textView.setText("No data is available. Please learn some data first!");
+                    return;
+                }
+
+                double maxVal = -200;
+                String maxLabel = null;
+                for (String key : map.keySet()) {
+                    if (map.get(key) > maxVal) {
+                        maxLabel = key;
+                        maxVal = map.get(key);
+                    }
+                }
+                textView.setText("The most possible position is " + maxLabel + "with RSSI = " + maxVal);
             }
         });
     }
@@ -67,9 +112,9 @@ public class MainActivity extends AppCompatActivity implements LabelDialog.Label
 
     }
 
-
     @Override
     public void applyText(String label) {
+        this.label = label;
         textView.setText("label is " + label);
         socketServerDemo.sendCommand(1);
     }
