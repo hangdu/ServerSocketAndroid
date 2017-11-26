@@ -1,5 +1,7 @@
 package com.example.hang.socketserver;
 
+import android.media.AudioManager;
+import android.media.ToneGenerator;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -33,6 +35,7 @@ public class SocketServerDemo extends Thread {
     SocketReadThread readThread;
     SocketWriteThread writeThread;
     Queue<Integer> commandQueue = new LinkedList<>();
+    ToneGenerator toneG;
     public SocketServerDemo(TextView textView, TextView status_textview, Socket s) {
         this.textView = textView;
         this.status_textview = status_textview;
@@ -40,6 +43,8 @@ public class SocketServerDemo extends Thread {
         lastReceiveHeartbeatTime = System.currentTimeMillis();
 
         new Thread(monitorHeartBeat).start();
+        // send the tone to the "alarm" stream (classic beeps go there) with 50% volume
+        toneG = new ToneGenerator(AudioManager.STREAM_ALARM, 50);
     }
 
     public Handler myHandler = new Handler(Looper.getMainLooper()) {
@@ -180,6 +185,10 @@ public class SocketServerDemo extends Thread {
                         int index = resultStr.indexOf('=');
                         int RSSI = Integer.valueOf(resultStr.substring(index+2));
                         MainActivity.strengthList.add(RSSI);
+                        if (RSSI > MainActivity.maxRSSI) {
+                            MainActivity.maxRSSI = RSSI;
+                            toneG.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 200);
+                        }
                     }
                     Message msg = new Message();
                     msg.what = 1;

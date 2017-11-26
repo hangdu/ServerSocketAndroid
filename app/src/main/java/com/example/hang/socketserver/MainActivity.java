@@ -13,16 +13,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity implements LabelDialog.LabelDialogListener {
+public class MainActivity extends AppCompatActivity {
     TextView textView;
     TextView status_textview;
     Button startCollect;
     Button stopCollect;
-    Button track;
+//    Button track;
     SocketServerDemo socketServerDemo;
     static List<Integer> strengthList;
-    Map<String, Double> map;
-    String label = null;
+    static int maxRSSI = -200;
+//    Map<String, Double> map;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -32,9 +32,9 @@ public class MainActivity extends AppCompatActivity implements LabelDialog.Label
         status_textview = (TextView) findViewById(R.id.status_textview);
         startCollect = (Button) findViewById(R.id.startCollect);
         stopCollect = (Button) findViewById(R.id.stopCollect);
-        track = (Button) findViewById(R.id.track);
+//        track = (Button) findViewById(R.id.track);
+
         strengthList = new ArrayList<>();
-        map = new HashMap<>();
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements LabelDialog.Label
             @Override
             public void onClick(View view) {
                 textView.setText("StartCollect Button is clicked!");
-                openDialog();
+                socketServerDemo.sendCommand(1);
             }
         });
 
@@ -77,45 +77,40 @@ public class MainActivity extends AppCompatActivity implements LabelDialog.Label
                     temp += val;
                 }
                 temp = temp / strengthList.size();
-
                 textView.setText(new String(builder) + '\n' + "averageRSSI = " + temp);
-                System.out.print(new String(builder));
+
                 strengthList.clear();
-                map.put(label, temp);
+                maxRSSI = -200;
             }
         });
 
-        track.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (map.size() == 0) {
-                    textView.setText("No data is available. Please learn some data first!");
-                    return;
-                }
-
-                double maxVal = -200;
-                String maxLabel = null;
-                for (String key : map.keySet()) {
-                    if (map.get(key) > maxVal) {
-                        maxLabel = key;
-                        maxVal = map.get(key);
-                    }
-                }
-                textView.setText("The most possible position is " + maxLabel + "with RSSI = " + maxVal);
-            }
-        });
+//        track.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                if (map.size() == 0) {
+//                    textView.setText("No data is available. Please learn some data first!");
+//                    return;
+//                }
+//
+//                double maxVal = -200;
+//                String maxLabel = null;
+//                for (String key : map.keySet()) {
+//                    if (map.get(key) > maxVal) {
+//                        maxLabel = key;
+//                        maxVal = map.get(key);
+//                    }
+//                }
+//                textView.setText("The most possible position is " + maxLabel + "with RSSI = " + maxVal);
+//            }
+//        });
     }
 
-    public void openDialog() {
-        LabelDialog labelDialog = new LabelDialog();
-        labelDialog.show(getSupportFragmentManager(), "label dialog");
 
-    }
-
-    @Override
-    public void applyText(String label) {
-        this.label = label;
-        textView.setText("label is " + label);
-        socketServerDemo.sendCommand(1);
-    }
+//
+//    @Override
+//    public void applyText(String label) {
+//        this.label = label;
+//        textView.setText("label is " + label);
+//
+//    }
 }
